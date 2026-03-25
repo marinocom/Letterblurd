@@ -1,0 +1,1 @@
+// Background script handle service worker -> Intercept GET requests to check if user has reviewed the film 

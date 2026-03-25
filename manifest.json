@@ -1,0 +1,37 @@
+{
+    "manifest_version": 3,
+    "name": "Letterblurd",
+    "version": "1.0",
+    "description": "Blur Letterboxd ratings until you've reviewed the film",
+    "icons": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "permissions": [
+      "storage",
+      "webRequest"
+    ],
+    "host_permissions": [
+      "https://letterboxd.com/*"
+    ],
+    "background": {
+      "service_worker": "background.js", 
+      "scripts": ["background.js"]
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://letterboxd.com/film/*/*"],
+        "js": ["content.js"],
+        "css": ["content.css"],
+        "run_at": "document_start"
+      }
+    ],
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png"
+      }
+    }
+  }

@@ -1,0 +1,1 @@
+// On/Off toggle, uses storage.local to save state
