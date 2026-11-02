@@ -1,3 +1,125 @@
-/* Loads blur first befire js loads */
-/* Blurs standard ditribution fake histogram */
-/* Styles hover to reveal button */
+/*
+ * Letterblurd content styles.
+ *
+ * Injected at document_start, before Letterboxd paints, so the real numbers
+ * never flash on screen. Everything is gated on classes on <html> that the
+ * content script controls:
+ *   html.lbb-off        extension switched off in the popup
+ *   html.lbb-unlocked   this film is rated, or "Reveal anyway?" was clicked
+ *
+ * The real chart is hidden with opacity, not visibility: Letterboxd's own CSS
+ * sets visibility on the bars, which overrides an inherited visibility:hidden,
+ * but nothing inside can undo an ancestor's opacity.
+ */
+
+/* 1. Hide the real data immediately (no flash of the real histogram). */
+html:not(.lbb-off):not(.lbb-unlocked) .rating-histogram > :not(.lbb-decoy):not([class*="rating-green"]),
+html:not(.lbb-off):not(.lbb-unlocked) .ratings-histogram-chart :is(.average-rating, .display-rating) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 1b. Keep the ½★ and ★★★★★ end markers, softly blurred. */
+html:not(.lbb-off):not(.lbb-unlocked) .ratings-histogram-chart [class*="rating-green"] {
+  filter: blur(1.5px);
+  transition: filter 450ms ease;
+}
+
+/* 2. Containers the overlays are positioned against. The script adds
+      .lbb-anchor only to elements Letterboxd leaves position: static, so
+      we never move their layout. */
+.lbb-anchor { position: relative; }
+
+/* 3. Decoy histogram: the same "natural" shape for every film, blurred. */
+.lbb-decoy {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  pointer-events: none;
+  filter: blur(5px);
+  opacity: 1;
+  transition: opacity 450ms ease, filter 450ms ease;
+}
+.lbb-decoy span {
+  flex: 1 1 0;
+  background: #678;
+  border-radius: 1px 1px 0 0;
+}
+
+.lbb-fake-avg {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ab;
+  font-size: 30px;
+  font-weight: 300;
+  pointer-events: none;
+  user-select: none;
+  /* Enough blur to hide the digits, little enough to still read as a number. */
+  filter: blur(3.5px);
+  transition: opacity 450ms ease, filter 450ms ease;
+}
+
+/* 4. "Reveal anyway?" button, styled like Letterboxd's slate buttons. */
+.lbb-reveal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -30%);
+  z-index: 5;
+  margin: 0;
+  padding: 9px 12px 8px;
+  border: 1px solid rgba(221, 238, 255, 0.35);
+  border-radius: 3px;
+  background: transparent;
+  color: #def;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  font-family: Graphik-Semibold-Web, "Graphik", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.075em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease, background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.lbb-managed:hover .lbb-reveal,
+.lbb-reveal:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.lbb-reveal:hover { background: rgba(221, 238, 255, 0.08); border-color: rgba(221, 238, 255, 0.6); color: #fff; }
+.lbb-reveal:focus-visible { outline: 2px solid #40bcf4; outline-offset: 2px; }
+
+/* 5. Unlocked: fade the decoy out and the real chart in. */
+html.lbb-unlocked .lbb-decoy,
+html.lbb-unlocked .lbb-fake-avg {
+  opacity: 0;
+  filter: blur(0);
+}
+html.lbb-unlocked .lbb-reveal { display: none; }
+html.lbb-unlocked .rating-histogram > :not(.lbb-decoy):not([class*="rating-green"]),
+html.lbb-unlocked .ratings-histogram-chart .average-rating {
+  animation: lbb-unblur 450ms ease both;
+}
+@keyframes lbb-unblur {
+  from { filter: blur(5px); opacity: 0; }
+  to   { filter: blur(0);   opacity: 1; }
+}
+
+/* 6. Extension switched off: hide everything we added. */
+html.lbb-off .lbb-decoy,
+html.lbb-off .lbb-fake-avg,
+html.lbb-off .lbb-reveal { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lbb-decoy, .lbb-fake-avg, .lbb-reveal { transition: none; }
+  html.lbb-unlocked .rating-histogram > *,
+  html.lbb-unlocked .ratings-histogram-chart .average-rating { animation: none; }
+}

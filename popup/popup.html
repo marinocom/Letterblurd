@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Letterblurd</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="../icons/icon-48.png" alt="" width="28" height="28">
+    <h1>Letterblurd</h1>
+  </header>
+
+  <label class="row" for="enabled">
+    <span class="text">
+      <span class="title">Blur ratings</span>
+      <span class="hint" id="status">Ratings stay hidden until you rate the film.</span>
+    </span>
+    <span class="switch">
+      <input type="checkbox" id="enabled" role="switch">
+      <span class="track" aria-hidden="true"></span>
+    </span>
+  </label>
+
+  <details class="about">
+    <summary>About</summary>
+    <p>Letterblurd hides a film's ratings on Letterboxd until you've rated it yourself, so you can form your own opinion first.</p>
+    <p>No tracking, no accounts, no data leaves your browser.</p>
+  </details>
+
+  <footer>
+    <span>Made by <a href="https://github.com/marinocom" target="_blank" rel="noopener">Marino</a></span>
+    <span><span id="version"></span> · Not affiliated with Letterboxd.</span>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
